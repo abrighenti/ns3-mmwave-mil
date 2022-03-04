@@ -27,6 +27,7 @@
 #include <istream>
 #include <string>
 #include <vector>
+#include <limits>
 
 /**
  * \file
