@@ -77,6 +77,27 @@ mmWaveInterference::GetTypeId (void)
   return tid;
 }
 
+double
+mmWaveInterference::GetInterference()
+{
+  SpectrumValue interf;
+  bool changed=false;
+  if (m_allSignals != 0){
+    interf = (*m_allSignals);
+    changed=true;
+    if (m_rxSignal != 0){
+      interf -= (*m_rxSignal);
+    }
+    if (m_noise != 0){
+      interf += (*m_noise);
+    }
+  }
+  if (changed)
+    return Norm(interf);
+  else
+    return 0.0;
+}
+
 
 void
 mmWaveInterference::StartRx (Ptr<const SpectrumValue> rxPsd)

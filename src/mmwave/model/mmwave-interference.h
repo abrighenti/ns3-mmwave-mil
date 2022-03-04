@@ -55,6 +55,7 @@ public:
   void SetNoisePowerSpectralDensity (Ptr<const SpectrumValue> noisePsd);
   void AddPowerChunkProcessor (Ptr<mmWaveChunkProcessor> p);
   void AddSinrChunkProcessor (Ptr<mmWaveChunkProcessor> p);
+  double GetInterference();
 
 private:
   void ConditionallyEvaluateChunk ();
