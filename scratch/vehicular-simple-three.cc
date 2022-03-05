@@ -263,7 +263,7 @@ int main (int argc, char *argv[])
   Simulator::Stop (MilliSeconds(stopTime + 1000));
   Simulator::Run ();
   Simulator::Destroy ();
-  std::cout << double(g_txPacketsGroup1 + g_txPacketsGroup2) << std::endl;
+  //std::cout << double(g_txPacketsGroup1 + g_txPacketsGroup2) << std::endl;
   std::cout << "PRR " << double(g_rxPacketsGroup1 + g_rxPacketsGroup2) / double(g_txPacketsGroup1 + g_txPacketsGroup2) << std::endl;
 
   return 0;
