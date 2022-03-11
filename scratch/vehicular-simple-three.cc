@@ -102,7 +102,7 @@ int main (int argc, char *argv[])
   uint32_t stopTime = 2000; // application stop time in milliseconds
   uint32_t onPeriod = 100; // on period duration in milliseconds
   uint32_t offPeriod = 100; // mean duration of the off period in milliseconds
-  double dataRate = 100e6; // data rate in bps
+  double dataRate = 200e6; // data rate in bps
   uint32_t mcs = 28; // modulation and coding scheme
   bool csma = true;
 
@@ -264,7 +264,9 @@ int main (int argc, char *argv[])
   Simulator::Run ();
   Simulator::Destroy ();
   //std::cout << double(g_txPacketsGroup1 + g_txPacketsGroup2) << std::endl;
-  std::cout << "PRR " << double(g_rxPacketsGroup1 + g_rxPacketsGroup2) / double(g_txPacketsGroup1 + g_txPacketsGroup2) << std::endl;
+  //std::cout << "PRR " << double(g_rxPacketsGroup1 + g_rxPacketsGroup2) / double(g_txPacketsGroup1 + g_txPacketsGroup2) << std::endl;
+  std::cout << "PRR g1 " << double(g_rxPacketsGroup1) / double(g_txPacketsGroup1) << std::endl;
+  std::cout << "PRR g2 " << double(g_rxPacketsGroup2) / double(g_txPacketsGroup2) << std::endl;
 
   return 0;
 }
