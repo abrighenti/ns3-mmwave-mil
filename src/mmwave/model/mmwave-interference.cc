@@ -88,9 +88,9 @@ mmWaveInterference::GetInterference()
     if (m_rxSignal != 0){
       interf -= (*m_rxSignal);
     }
-    if (m_noise != 0){
-      interf += (*m_noise);
-    }
+    //if (m_noise != 0){
+    //  interf += (*m_noise);
+    //}
   }
   if (changed)
     return Norm(interf);
