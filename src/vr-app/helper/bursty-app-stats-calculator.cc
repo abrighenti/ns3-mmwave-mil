@@ -209,6 +209,14 @@ BurstyAppStatsCalculator::ReadResults (void)
         }
     }
 
+  for (auto it = m_rxBursts.begin (); it != m_rxBursts.end (); ++it)
+    {
+      if (find (nodeIdsVector.begin (), nodeIdsVector.end (), (*it).first) == nodeIdsVector.end ())
+        {
+          nodeIdsVector.push_back ((*it).first);
+        }
+    }
+
   std::map<uint16_t, AppResults> results;
   for (auto it = nodeIdsVector.begin (); it != nodeIdsVector.end ();
        ++it)
@@ -291,6 +299,14 @@ BurstyAppStatsCalculator::WriteResults (std::ofstream &outFile)
 
   std::vector<uint32_t> nodeIdsVector;
   for (auto it = m_txBursts.begin (); it != m_txBursts.end (); ++it)
+    {
+      if (find (nodeIdsVector.begin (), nodeIdsVector.end (), (*it).first) == nodeIdsVector.end ())
+        {
+          nodeIdsVector.push_back ((*it).first);
+        }
+    }
+
+  for (auto it = m_rxBursts.begin (); it != m_rxBursts.end (); ++it)
     {
       if (find (nodeIdsVector.begin (), nodeIdsVector.end (), (*it).first) == nodeIdsVector.end ())
         {

@@ -240,7 +240,6 @@ int main (int argc, char *argv[])
   NS_LOG_DEBUG("IPv4 Address node 2 group 1: " << group1.Get (2)->GetObject<Ipv4> ()->GetAddress (1, 0).GetLocal ());
   NS_LOG_DEBUG("IPv4 Address node 3 group 1: " << group1.Get (3)->GetObject<Ipv4> ()->GetAddress (1, 0).GetLocal ());
 
-
   Ipv4Address serverAddress = i.GetAddress (3);
   Ipv4Address sinkAddress = Ipv4Address::GetAny (); // 0.0.0.0
 
@@ -255,47 +254,47 @@ int main (int argc, char *argv[])
                                   "TraceFile", StringValue (traceFolder + traceFile));
 
   // Install bursty application
-  ApplicationContainer serverApps = burstyHelper.Install (group1.Get (0));
-  serverApps.Add(burstyHelper.Install (group1.Get (1)));
-  serverApps.Add(burstyHelper.Install (group1.Get (2)));
-  Ptr<BurstyApplication> burstyApp1 = serverApps.Get (0)->GetObject<BurstyApplication> ();
-  Ptr<BurstyApplication> burstyApp2 = serverApps.Get (1)->GetObject<BurstyApplication> ();
-  Ptr<BurstyApplication> burstyApp3 = serverApps.Get (2)->GetObject<BurstyApplication> ();
+  ApplicationContainer clientApps;
+  ApplicationContainer serverApps;
   
+  Ptr<BurstyAppStatsCalculator> statsCalculator = CreateObject<BurstyAppStatsCalculator>();
 
   // Create burst sink helper
+  for (int i = 0; i < 3 ; i++)
+  {
+    clientApps.Add (burstyHelper.Install (group1.Get (i)));
+    Ptr<BurstyApplication> burstyApp = clientApps.Get (i)->GetObject<BurstyApplication> ();
+    burstyApp->TraceConnectWithoutContext ("BurstTx", MakeBoundCallback (&TxBurstCallback, 1+group1.Get (i)->GetId(), statsCalculator));
+
   BurstSinkHelper burstSinkHelper ("ns3::UdpSocketFactory",
-                                   InetSocketAddress (sinkAddress, port));
+                                    InetSocketAddress (sinkAddress, port+i));
 
   // Install HTTP client
-  ApplicationContainer clientApps = burstSinkHelper.Install (group1.Get (3));
-  Ptr<BurstSink> burstSink = clientApps.Get (0)->GetObject<BurstSink> ();
-
-  // connect the trace sources to the sinks
-  /*AsciiTraceHelper asciiTraceHelper;
-  Ptr<OutputStreamWrapper> stream = asciiTraceHelper.CreateFileStream ("plotsTHR/rx.txt");
-  // Example of connecting to the trace sources
-  burstSink->TraceConnectWithoutContext ("BurstRx", MakeBoundCallback (&BurstRx, stream));*/
-
-  Ptr<BurstyAppStatsCalculator> statsCalculator = CreateObject<BurstyAppStatsCalculator>();
-  burstyApp1->TraceConnectWithoutContext ("BurstTx", MakeBoundCallback (&TxBurstCallback, 1+group1.Get (0)->GetId(), statsCalculator));
-  burstyApp2->TraceConnectWithoutContext ("BurstTx", MakeBoundCallback (&TxBurstCallback, 1+group1.Get (1)->GetId(), statsCalculator));
-  burstyApp3->TraceConnectWithoutContext ("BurstTx", MakeBoundCallback (&TxBurstCallback, 1+group1.Get (2)->GetId(), statsCalculator));
-
+    serverApps.Add(burstSinkHelper.Install (group1.Get (3)));
+    Ptr<BurstSink> burstSink = serverApps.Get (serverApps.GetN () - 1)->GetObject<BurstSink> ();
   burstSink->TraceConnectWithoutContext ("BurstRx", MakeBoundCallback (&RxBurstCallback, 1+group1.Get(3)->GetId(), statsCalculator));
+    // Link the burst generator to the bursty sink to process the correct reception delay
+    Ptr<KittiTraceBurstGenerator> ktb =
+        DynamicCast<KittiTraceBurstGenerator> (burstyApp->GetBurstGenerator ());
+    burstSink->ConnectBurstGenerator (ktb);
+  }
+
   // TraceFileBurstGenerator stops automatically, but we add an early stop to make the example quicker
-  serverApps.Stop (Seconds(20));
+  Ptr<UniformRandomVariable> rv = CreateObjectWithAttributes<UniformRandomVariable> (
+      "Min", DoubleValue (0), "Max", DoubleValue (1.0));
+  clientApps.StartWithJitter (Seconds (1.0), rv);
+  clientApps.Stop (Seconds(40));
   //Simulator::Stop (MilliSeconds(stopTime + 1000));
   Simulator::Run ();
   Simulator::Destroy ();
 
   // Stats
-  std::cout << "Dev1 Total RX bursts: " << burstyApp1->GetTotalTxBursts () << "/"
-            << burstSink->GetTotalRxBursts () << std::endl;
-  std::cout << "Dev1 Total RX fragments: " << burstyApp1->GetTotalTxFragments () << "/"
-            << burstSink->GetTotalRxFragments () << std::endl;
-  std::cout << "Dev1 Total RX bytes: " << burstyApp1->GetTotalTxBytes () << "/"
-            << burstSink->GetTotalRxBytes () << std::endl;
+  // std::cout << "Dev1 Total RX bursts: " << burstyApp1->GetTotalTxBursts () << "/"
+  //           << burstSink->GetTotalRxBursts () << std::endl;
+  // std::cout << "Dev1 Total RX fragments: " << burstyApp1->GetTotalTxFragments () << "/"
+  //           << burstSink->GetTotalRxFragments () << std::endl;
+  // std::cout << "Dev1 Total RX bytes: " << burstyApp1->GetTotalTxBytes () << "/"
+  //           << burstSink->GetTotalRxBytes () << std::endl;
 
   // connect the trace sources to the sinks
   /*
