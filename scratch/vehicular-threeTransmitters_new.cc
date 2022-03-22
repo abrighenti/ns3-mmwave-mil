@@ -179,21 +179,20 @@ int main (int argc, char *argv[])
   std::string traceFile = "kitti-dataset.csv";
   // create the appplications for group 1
   uint32_t port = 50000;
-  BurstyHelper burstyHelper ("ns3::UdpSocketFactory",
-                             InetSocketAddress (serverAddress, port));
-  burstyHelper.SetAttribute ("FragmentSize", UintegerValue (1200));
-  burstyHelper.SetBurstGenerator ("ns3::KittiTraceBurstGenerator",
-                                  "TraceFile", StringValue (traceFolder + traceFile));
 
   // Install bursty application
   ApplicationContainer clientApps;
   ApplicationContainer serverApps;
   
-  
-
   // Create burst sink helper
-  for (int i = 0; i < 3 ; i++)
+  for (int i = 0; i < 3; i++)
   {
+    BurstyHelper burstyHelper ("ns3::UdpSocketFactory",
+                              InetSocketAddress (serverAddress, port+i));
+    burstyHelper.SetAttribute ("FragmentSize", UintegerValue (1200));
+    burstyHelper.SetBurstGenerator ("ns3::KittiTraceBurstGenerator",
+                                    "TraceFile", StringValue (traceFolder + traceFile));
+
     Ptr<BurstyAppStatsCalculator> statsCalculator = CreateObject<BurstyAppStatsCalculator>();
     std::string filename="statsDev" + std::to_string(i+1)+".txt";
     statsCalculator->SetAttribute("OutputFilename", StringValue(filename));
@@ -201,17 +200,16 @@ int main (int argc, char *argv[])
     Ptr<BurstyApplication> burstyApp = clientApps.Get (i)->GetObject<BurstyApplication> ();
     burstyApp->TraceConnectWithoutContext ("BurstTx", MakeBoundCallback (&TxBurstCallback, 1+group1.Get (i)->GetId(), statsCalculator));
 
-  BurstSinkHelper burstSinkHelper ("ns3::UdpSocketFactory",
-                                    InetSocketAddress (sinkAddress, port+i));
+    BurstSinkHelper burstSinkHelper ("ns3::UdpSocketFactory", InetSocketAddress (sinkAddress, port+i));
 
   // Install HTTP client
     serverApps.Add(burstSinkHelper.Install (group1.Get (3)));
     //std::cout << serverApps.GetN() << std::endl;
     Ptr<BurstSink> burstSink = serverApps.Get (serverApps.GetN () - 1)->GetObject<BurstSink> ();
-  burstSink->TraceConnectWithoutContext ("BurstRx", MakeBoundCallback (&RxBurstCallback, 1+group1.Get(3)->GetId(), statsCalculator));
+    burstSink->TraceConnectWithoutContext ("BurstRx", MakeBoundCallback (&RxBurstCallback, 1+group1.Get(3)->GetId(), statsCalculator));
+
     // Link the burst generator to the bursty sink to process the correct reception delay
-    Ptr<KittiTraceBurstGenerator> ktb =
-        DynamicCast<KittiTraceBurstGenerator> (burstyApp->GetBurstGenerator ());
+    Ptr<KittiTraceBurstGenerator> ktb = DynamicCast<KittiTraceBurstGenerator> (burstyApp->GetBurstGenerator ());
     burstSink->ConnectBurstGenerator (ktb);
   }
 
