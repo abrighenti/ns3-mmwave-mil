@@ -55,63 +55,6 @@ using namespace millicar;
   Ratio.
 */
 
-uint32_t g_txPacketsGroup1 = 0; // tx packet counter for group 1
-uint32_t g_rxPacketsGroup1 = 0; // rx packet counter for group 1
-
-uint32_t g_rxDev1 = 0; // rx packet counter for dev 1
-uint32_t g_rxDev2 = 0; // rx packet counter for dev 2
-uint32_t g_rxDev3 = 0; // rx packet counter for dev 3
-
-uint32_t g_txDev1 = 0; // tx packet counter for dev 1
-uint32_t g_txDev2 = 0; // tx packet counter for dev 2
-uint32_t g_txDev3 = 0; // tx packet counter for dev 3
-
-/*static void Tx (Ptr<OutputStreamWrapper> stream, int device, Ptr<const Packet> p)
-{
-  *stream->GetStream () << "Tx\t" << device << "\t" << Simulator::Now ().GetSeconds () << "\t" << p->GetSize () << std::endl;
-  ++g_txPacketsGroup1;
-
-  switch(device){
-    case 1:
-      ++g_txDev1;
-      break;
-    case 2:
-      ++g_txDev2;
-      break;
-    case 3:
-      ++g_txDev3;
-      break;
-    default:
-      break;
-  }
-}
-
-static void Rx (Ptr<OutputStreamWrapper> stream, Ptr<const Packet> packet, const Address& from)
-{
-  Ptr<Packet> newPacket = packet->Copy ();
-  SeqTsHeader seqTs;
-  newPacket->RemoveHeader (seqTs);
-  if (seqTs.GetTs ().GetNanoSeconds () != 0)
-  {
-    uint64_t delayNs = Simulator::Now ().GetNanoSeconds () - seqTs.GetTs ().GetNanoSeconds ();
-    *stream->GetStream () << "Rx\t" << Simulator::Now ().GetSeconds () << "\t" << packet->GetSize() << "\t" <<  delayNs << std::endl;
-  }
-  else
-  {
-    *stream->GetStream () << "Rx\t" << Simulator::Now ().GetSeconds () << "\t" << packet->GetSize() << "\t" << -1 << std::endl;
-  }
-
-  ++g_rxPacketsGroup1;
-  std::string fromstr=AddressToString(from);
-  if (fromstr == "10.1.1.1"){
-    g_rxDev1+=1;
-  }else if (fromstr == "10.1.1.2"){
-    g_rxDev2+=1;
-  }else if (fromstr == "10.1.1.3"){
-    g_rxDev3+=1;
-  }
-}*/
-
 std::string
 AddressToString (const Address &addr)
 {
@@ -120,28 +63,17 @@ AddressToString (const Address &addr)
   return addressStr.str ();
 }
 
-void
-BurstRx (Ptr<OutputStreamWrapper> stream, Ptr<const Packet> burst, const Address &from, const Address &to,
-         const SeqTsSizeFragHeader &header)
-{
-  *stream->GetStream() << "Received burst seq=" << header.GetSeq () << " of " << header.GetSize ()
-                                     << " bytes transmitted at " << std::setprecision (9)
-                                     << header.GetTs ().As (Time::S);
-}
-
 static void
 RxBurstCallback (uint32_t nodeId, Ptr<BurstyAppStatsCalculator> statsCalculator, Ptr<const Packet> burst, const Address &from,
          const Address &to, const SeqTsSizeFragHeader &header)
 {
-  std::cout << AddressToString(from) << " " << AddressToString(to) << std::endl;
   statsCalculator->RxBurst (nodeId, burst, from, to, header);
 }
 
 static void
 TxBurstCallback (uint32_t nodeId, Ptr<BurstyAppStatsCalculator> statsCalculator, Ptr<const Packet> burst,
                  const Address &from, const Address &to, const SeqTsSizeFragHeader &header)
-{
-  
+{  
   statsCalculator->TxBurst (nodeId, burst, from, to, header);
 }
 
@@ -257,11 +189,14 @@ int main (int argc, char *argv[])
   ApplicationContainer clientApps;
   ApplicationContainer serverApps;
   
-  Ptr<BurstyAppStatsCalculator> statsCalculator = CreateObject<BurstyAppStatsCalculator>();
+  
 
   // Create burst sink helper
   for (int i = 0; i < 3 ; i++)
   {
+    Ptr<BurstyAppStatsCalculator> statsCalculator = CreateObject<BurstyAppStatsCalculator>();
+    std::string filename="statsDev" + std::to_string(i+1)+".txt";
+    statsCalculator->SetAttribute("OutputFilename", StringValue(filename));
     clientApps.Add (burstyHelper.Install (group1.Get (i)));
     Ptr<BurstyApplication> burstyApp = clientApps.Get (i)->GetObject<BurstyApplication> ();
     burstyApp->TraceConnectWithoutContext ("BurstTx", MakeBoundCallback (&TxBurstCallback, 1+group1.Get (i)->GetId(), statsCalculator));
@@ -271,6 +206,7 @@ int main (int argc, char *argv[])
 
   // Install HTTP client
     serverApps.Add(burstSinkHelper.Install (group1.Get (3)));
+    //std::cout << serverApps.GetN() << std::endl;
     Ptr<BurstSink> burstSink = serverApps.Get (serverApps.GetN () - 1)->GetObject<BurstSink> ();
   burstSink->TraceConnectWithoutContext ("BurstRx", MakeBoundCallback (&RxBurstCallback, 1+group1.Get(3)->GetId(), statsCalculator));
     // Link the burst generator to the bursty sink to process the correct reception delay
@@ -284,24 +220,8 @@ int main (int argc, char *argv[])
       "Min", DoubleValue (0), "Max", DoubleValue (1.0));
   clientApps.StartWithJitter (Seconds (1.0), rv);
   clientApps.Stop (Seconds(40));
-  //Simulator::Stop (MilliSeconds(stopTime + 1000));
   Simulator::Run ();
   Simulator::Destroy ();
-
-  // Stats
-  // std::cout << "Dev1 Total RX bursts: " << burstyApp1->GetTotalTxBursts () << "/"
-  //           << burstSink->GetTotalRxBursts () << std::endl;
-  // std::cout << "Dev1 Total RX fragments: " << burstyApp1->GetTotalTxFragments () << "/"
-  //           << burstSink->GetTotalRxFragments () << std::endl;
-  // std::cout << "Dev1 Total RX bytes: " << burstyApp1->GetTotalTxBytes () << "/"
-  //           << burstSink->GetTotalRxBytes () << std::endl;
-
-  // connect the trace sources to the sinks
-  /*
-  std::cout << "PRR " << double(g_rxPacketsGroup1) / double(g_txPacketsGroup1) << std::endl;
-  std::cout << "PRR dev1" << double(g_rxDev1) / double(g_txDev1) << std::endl;
-  std::cout << "PRR dev2" << double(g_rxDev2) / double(g_txDev2) << std::endl;
-  std::cout << "PRR dev3" << double(g_rxDev3) / double(g_txDev3) << std::endl;*/
 
   return 0;
 }
