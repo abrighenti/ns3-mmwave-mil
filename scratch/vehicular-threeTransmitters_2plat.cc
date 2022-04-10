@@ -228,10 +228,10 @@ int main (int argc, char *argv[])
     Ptr<BurstyAppStatsCalculator> statsCalculator = CreateObject<BurstyAppStatsCalculator>();
     char filename[100];
     if(csma)
-      sprintf(filename, "../Documenti/shared/2plat.CSMA.thr%.1e.stats.Dev%d.%.1f.txt", intThreshold, 1+group1.Get (i)->GetId(), interGroupDistance);
+      sprintf(filename, "2plat.CSMA.thr%.1g.stats.Dev%d.%.1f.txt", intThreshold, 1+group1.Get (i)->GetId(), interGroupDistance);
     else
-      sprintf(filename, "../Documenti/shared/2plat.slotted.stats.Dev%d.%.1f.txt", 1+group1.Get (i)->GetId(), interGroupDistance);
-    //std::string filename="statsDev" + std::to_string(i+1)+".txt";
+      sprintf(filename, "2plat.slotted.stats.Dev%d.%.1f.txt", 1+group1.Get (i)->GetId(), interGroupDistance);
+    
     statsCalculator->SetAttribute("OutputFilename", StringValue(filename));
     statsCalculator->SetAttribute("EpochDuration", TimeValue (Seconds (0.5)));
     clientApps.Add (burstyHelper.Install (group1.Get (i)));
@@ -267,9 +267,9 @@ int main (int argc, char *argv[])
     Ptr<BurstyAppStatsCalculator> statsCalculator = CreateObject<BurstyAppStatsCalculator>();
     char filename[100];
     if(csma)
-      sprintf(filename, "../Documenti/shared/2plat.CSMA.thr%.1e.stats.Dev%d.%.1f.txt", intThreshold, 1+group2.Get (i)->GetId(), interGroupDistance);
+      sprintf(filename, "2plat.CSMA.thr%.1g.stats.Dev%d.%.1f.txt", intThreshold, 1+group2.Get (i)->GetId(), interGroupDistance);
     else
-      sprintf(filename, "../Documenti/shared/2plat.slotted.stats.Dev%d.%.1f.txt", 1+group2.Get (i)->GetId(), interGroupDistance);
+      sprintf(filename, "2plat.slotted.stats.Dev%d.%.1f.txt", 1+group2.Get (i)->GetId(), interGroupDistance);
     statsCalculator->SetAttribute("OutputFilename", StringValue(filename));
     statsCalculator->SetAttribute("EpochDuration", TimeValue (Seconds (0.5)));
     clientApps.Add (burstyHelper.Install (group2.Get (i)));
@@ -298,18 +298,19 @@ int main (int argc, char *argv[])
   Simulator::Run ();
   Simulator::Destroy ();
 
+  std::cout << "Dev\tTxFrag\tRxFrag\tTxBytes\tRxBytes"<< std::endl;
   for (int i = 0; i < 3; i++)
   {
     Ptr<BurstyApplication> burstyApp = clientApps.Get (i)->GetObject<BurstyApplication> ();
     Ptr<BurstSink> burstSink = serverApps.Get (i)->GetObject<BurstSink> ();
-    std::cout << "Dev" << i+1<< " PRR: " << (double)burstSink->GetTotalRxFragments ()/ (double)burstyApp->GetTotalTxFragments () << std::endl;
+    std::cout << i+1 << "\t" <<burstyApp->GetTotalTxFragments () << "\t" << burstSink->GetTotalRxFragments()<<"\t" << burstyApp->GetTotalTxBytes() << "\t" <<burstSink->GetTotalRxBytes()<< std::endl;
   }
   
   for (int i = 3; i < 6; i++)
   {
     Ptr<BurstyApplication> burstyApp = clientApps.Get (i)->GetObject<BurstyApplication> ();
     Ptr<BurstSink> burstSink = serverApps.Get (i)->GetObject<BurstSink> ();
-    std::cout << "Dev" << i+2<< " PRR: " << (double)burstSink->GetTotalRxFragments ()/ (double)burstyApp->GetTotalTxFragments () << std::endl;
+    std::cout << i+2 << "\t" <<burstyApp->GetTotalTxFragments () << "\t" << burstSink->GetTotalRxFragments()<<"\t" << burstyApp->GetTotalTxBytes() << "\t" <<burstSink->GetTotalRxBytes()<< std::endl;
   }
 
   return 0;
