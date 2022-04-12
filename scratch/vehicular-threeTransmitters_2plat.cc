@@ -228,9 +228,9 @@ int main (int argc, char *argv[])
     Ptr<BurstyAppStatsCalculator> statsCalculator = CreateObject<BurstyAppStatsCalculator>();
     char filename[100];
     if(csma)
-      sprintf(filename, "2plat.CSMA.thr%.1g.stats.Dev%d.%.1f.txt", intThreshold, 1+group1.Get (i)->GetId(), interGroupDistance);
+      sprintf(filename, "../Documenti/shared/2plat.CSMA.thr%.1g.stats.Dev%d.%.1f.txt", intThreshold, 1+group1.Get (i)->GetId(), interGroupDistance);
     else
-      sprintf(filename, "2plat.slotted.stats.Dev%d.%.1f.txt", 1+group1.Get (i)->GetId(), interGroupDistance);
+      sprintf(filename, "../Documenti/shared/2plat.slotted.stats.Dev%d.%.1f.txt", 1+group1.Get (i)->GetId(), interGroupDistance);
     
     statsCalculator->SetAttribute("OutputFilename", StringValue(filename));
     statsCalculator->SetAttribute("EpochDuration", TimeValue (Seconds (0.5)));
@@ -267,9 +267,9 @@ int main (int argc, char *argv[])
     Ptr<BurstyAppStatsCalculator> statsCalculator = CreateObject<BurstyAppStatsCalculator>();
     char filename[100];
     if(csma)
-      sprintf(filename, "2plat.CSMA.thr%.1g.stats.Dev%d.%.1f.txt", intThreshold, 1+group2.Get (i)->GetId(), interGroupDistance);
+      sprintf(filename, "../Documenti/shared/2plat.CSMA.thr%.1g.stats.Dev%d.%.1f.txt", intThreshold, 1+group2.Get (i)->GetId(), interGroupDistance);
     else
-      sprintf(filename, "2plat.slotted.stats.Dev%d.%.1f.txt", 1+group2.Get (i)->GetId(), interGroupDistance);
+      sprintf(filename, "../Documenti/shared/2plat.slotted.stats.Dev%d.%.1f.txt", 1+group2.Get (i)->GetId(), interGroupDistance);
     statsCalculator->SetAttribute("OutputFilename", StringValue(filename));
     statsCalculator->SetAttribute("EpochDuration", TimeValue (Seconds (0.5)));
     clientApps.Add (burstyHelper.Install (group2.Get (i)));
