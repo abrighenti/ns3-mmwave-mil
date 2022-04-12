@@ -9,7 +9,7 @@ def main():
     # Define campaign parameters
     ############################
 
-    script = 'vehicular-threeTransmitters_2plat'
+    script = 'vehicular-threeTransmitters_2plat_sem'
     cmp_name = 'sem_3Transmitters_kitty_first' # define a campaign name in order to create different folders corresponding to a specific configuration
     ns_path = os.path.join(os.path.dirname(os.path.realpath(__file__)))
     campaign_dir = "./campaigns/"+cmp_name
