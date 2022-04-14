@@ -2,6 +2,7 @@
 *.orig
 *.patch
 *.rej
+sem*.py
 
 *.DS_Store
 
