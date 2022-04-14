@@ -304,8 +304,8 @@ int main (int argc, char *argv[])
   Ptr<UniformRandomVariable> rv = CreateObjectWithAttributes<UniformRandomVariable> (
       "Min", DoubleValue (0), "Max", DoubleValue (1.0));
   clientApps.StartWithJitter (Seconds (0.1), rv);
-  clientApps.Stop (Seconds(4));
-  Simulator::Stop (Seconds(5.5));
+  clientApps.Stop (Seconds(10));
+  Simulator::Stop (Seconds(11.5));
   Simulator::Run ();
   Simulator::Destroy ();
 
