@@ -27,6 +27,10 @@
 #include "ns3/core-module.h"
 
 #include <iomanip>
+
+#include <unistd.h>
+#include <stdio.h>
+
 #include "ns3/kitti-trace-burst-generator.h"
 
 #include "ns3/seq-ts-size-frag-header.h"
@@ -88,6 +92,7 @@ int main (int argc, char *argv[])
 
   uint32_t numAntennaElements = 4; // number of antenna elements
   double intThreshold=0.0;
+  std::string traceFolder = "input/"; // example traces can be found here
 
   CommandLine cmd;
   cmd.AddValue ("mcs", "modulation and coding scheme", mcs);
@@ -97,6 +102,7 @@ int main (int argc, char *argv[])
   cmd.AddValue ("threshold", "interference threshold to declare channel idle", intThreshold);
   cmd.AddValue ("speed", "the speed of the vehicles in m/s", speed);
   cmd.AddValue ("numAntennaElements", "number of antenna elements", numAntennaElements);
+  cmd.AddValue ("inputFolder", "folder for input dataset", traceFolder);
   cmd.Parse (argc, argv);
 
   Config::SetDefault ("ns3::MmWaveSidelinkMac::UseAmc", BooleanValue (false));
@@ -205,9 +211,18 @@ int main (int argc, char *argv[])
   Ipv4Address serverAddress = i1.GetAddress (3);
   Ipv4Address sinkAddress = Ipv4Address::GetAny (); // 0.0.0.0
 
-  std::string traceFolder = "input/"; // example traces can be found here
+  
   std::string traceFile = "kitti-dataset.csv";
-  // create the appplications for group 1
+  /*char traceFolder[40] = "../../..input/";
+  char traceFile[40] = "kitti-dataset.csv";
+  char cwd[1024];
+  strcpy(cwd, traceFolder);
+  strcat(cwd, traceFile);
+  chdir(cwd);
+  std::cout << "Current working dir: " << cwd << " \n" << std::endl;
+  getcwd(cwd, sizeof(cwd));
+  std::cout << "Current working dir: " << cwd << " \n" << std::endl;
+  // create the appplications for group 1*/
   uint32_t port = 50000;
 
   // Install bursty application
@@ -222,6 +237,7 @@ int main (int argc, char *argv[])
     burstyHelper.SetAttribute ("FragmentSize", UintegerValue (1200));
     burstyHelper.SetBurstGenerator ("ns3::KittiTraceBurstGenerator",
                                     "TraceFile", StringValue (traceFolder + traceFile));
+                                    //"TraceFile", StringValue (traceFile));
     burstyHelper.SetBurstGenerator ("ns3::KittiTraceBurstGenerator",
                                     "FramePeriod", TimeValue( MilliSeconds (50)));
 
@@ -256,14 +272,15 @@ int main (int argc, char *argv[])
     BurstyHelper burstyHelper ("ns3::UdpSocketFactory",
                               InetSocketAddress (serverAddress, port+i));
     burstyHelper.SetAttribute ("FragmentSize", UintegerValue (1200));
-    burstyHelper.SetBurstGenerator ("ns3::KittiTraceBurstGenerator",
+    burstyHelper.SetBurstGenerator ("ns3::KittiTraceBurstGenerator",                            
                                     "TraceFile", StringValue (traceFolder + traceFile));
+                                    //"TraceFile", StringValue (traceFile));
     burstyHelper.SetBurstGenerator ("ns3::KittiTraceBurstGenerator",
                                     "FramePeriod", TimeValue( MilliSeconds (50)));
 
     Ptr<BurstyAppStatsCalculator> statsCalculator = CreateObject<BurstyAppStatsCalculator>();
     char filename[100];
-    sprintf(filename, "Dev%d.txt",1+group1.Get(i)->GetId());
+    sprintf(filename, "Dev%d.txt",1+group2.Get(i)->GetId());
     statsCalculator->SetAttribute("OutputFilename", StringValue(filename));
     statsCalculator->SetAttribute("EpochDuration", TimeValue (Seconds (0.5)));
     clientApps.Add (burstyHelper.Install (group2.Get (i)));
@@ -287,8 +304,8 @@ int main (int argc, char *argv[])
   Ptr<UniformRandomVariable> rv = CreateObjectWithAttributes<UniformRandomVariable> (
       "Min", DoubleValue (0), "Max", DoubleValue (1.0));
   clientApps.StartWithJitter (Seconds (0.1), rv);
-  clientApps.Stop (Seconds(10));
-  Simulator::Stop (Seconds(11.5));
+  clientApps.Stop (Seconds(4));
+  Simulator::Stop (Seconds(5.5));
   Simulator::Run ();
   Simulator::Destroy ();
 
