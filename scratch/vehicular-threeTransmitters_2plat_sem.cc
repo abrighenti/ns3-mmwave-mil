@@ -85,6 +85,7 @@ int main (int argc, char *argv[])
 {
   uint32_t mcs = 28; // modulation and coding scheme
   bool csma = true;
+  bool orthogonalResources = false; // if true, resouces are orthogonal among the two groups, if false resources are shared
 
   double interGroupDistance = 5.0; // distance between the two groups in meters
   double intraGroupDistance = 20.0; // distance between cars belonging to the same group in meters
@@ -102,6 +103,7 @@ int main (int argc, char *argv[])
   cmd.AddValue ("threshold", "interference threshold to declare channel idle", intThreshold);
   cmd.AddValue ("speed", "the speed of the vehicles in m/s", speed);
   cmd.AddValue ("numAntennaElements", "number of antenna elements", numAntennaElements);
+  cmd.AddValue ("orthogonalResources", "if true, resouces are orthogonal among the two groups, if false resources are shared", orthogonalResources);
   cmd.AddValue ("inputFolder", "folder for input dataset", traceFolder);
   cmd.Parse (argc, argv);
 
@@ -175,8 +177,18 @@ int main (int argc, char *argv[])
   ipv4.SetBase ("10.1.2.0", "255.255.255.0");
   Ipv4InterfaceContainer i2 = ipv4.Assign (devs2);
 
-  helper->PairDevices(devs1);
-  helper->PairDevices(devs2);
+  if (orthogonalResources)
+  {
+    // resources are orthogonally partitioned among the two groups
+    helper->PairDevices (NetDeviceContainer (devs1, devs2));
+  }
+  else
+  {
+    // resources are othogally partitioned among devices belonging to the
+    // same group, while shared among the two groups
+    helper->PairDevices(devs1);
+    helper->PairDevices(devs2);
+  }
 
   Ipv4StaticRoutingHelper ipv4RoutingHelper;
 
