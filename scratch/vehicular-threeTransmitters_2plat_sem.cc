@@ -94,9 +94,11 @@ int main (int argc, char *argv[])
   uint32_t numAntennaElements = 4; // number of antenna elements
   double intThreshold=0.0;
   std::string traceFolder = "input/"; // example traces can be found here
+  uint32_t kittimodel=1450;
 
   CommandLine cmd;
   cmd.AddValue ("mcs", "modulation and coding scheme", mcs);
+  cmd.AddValue ("kittimodel", "traffic model for kitti burst generator", kittimodel);
   cmd.AddValue ("CSMA", "Usage of csma", csma);
   cmd.AddValue ("intraGroupDistance", "distance between vehicles in the group in meters", intraGroupDistance);
   cmd.AddValue ("interGroupDistance", "distance between the two groups in meters", interGroupDistance);
@@ -121,6 +123,9 @@ int main (int argc, char *argv[])
   Config::SetDefault ("ns3::MmWaveVehicularAntennaArrayModel::AntennaElementPattern", StringValue ("3GPP-V2V"));
   Config::SetDefault ("ns3::MmWaveVehicularAntennaArrayModel::IsotropicAntennaElements", BooleanValue (true));
   Config::SetDefault ("ns3::MmWaveVehicularAntennaArrayModel::NumSectors", UintegerValue (2));
+
+  Config::SetDefault ("ns3::KittiTraceBurstGenerator::Model", UintegerValue(kittimodel));
+
   // create the nodes
   NodeContainer group1, group2;
   group1.Create (4);
@@ -225,15 +230,7 @@ int main (int argc, char *argv[])
 
   
   std::string traceFile = "kitti-dataset.csv";
-  /*char traceFolder[40] = "../../..input/";
-  char traceFile[40] = "kitti-dataset.csv";
-  char cwd[1024];
-  strcpy(cwd, traceFolder);
-  strcat(cwd, traceFile);
-  chdir(cwd);
-  std::cout << "Current working dir: " << cwd << " \n" << std::endl;
-  getcwd(cwd, sizeof(cwd));
-  std::cout << "Current working dir: " << cwd << " \n" << std::endl;
+  
   // create the appplications for group 1*/
   uint32_t port = 50000;
 
@@ -258,7 +255,7 @@ int main (int argc, char *argv[])
     sprintf(filename, "Dev%d.txt",1+group1.Get(i)->GetId());
     
     statsCalculator->SetAttribute("OutputFilename", StringValue(filename));
-    statsCalculator->SetAttribute("EpochDuration", TimeValue (Seconds (0.5)));
+
     clientApps.Add (burstyHelper.Install (group1.Get (i)));
     Ptr<BurstyApplication> burstyApp = clientApps.Get (i)->GetObject<BurstyApplication> ();
     burstyApp->TraceConnectWithoutContext ("BurstTx", MakeBoundCallback (&TxBurstCallback, 1+group1.Get (i)->GetId(), statsCalculator));
@@ -294,7 +291,7 @@ int main (int argc, char *argv[])
     char filename[100];
     sprintf(filename, "Dev%d.txt",1+group2.Get(i)->GetId());
     statsCalculator->SetAttribute("OutputFilename", StringValue(filename));
-    statsCalculator->SetAttribute("EpochDuration", TimeValue (Seconds (0.5)));
+
     clientApps.Add (burstyHelper.Install (group2.Get (i)));
     Ptr<BurstyApplication> burstyApp = clientApps.Get (clientApps.GetN()-1)->GetObject<BurstyApplication> ();
     burstyApp->TraceConnectWithoutContext ("BurstTx", MakeBoundCallback (&TxBurstCallback, 1+group2.Get (i)->GetId(), statsCalculator));
