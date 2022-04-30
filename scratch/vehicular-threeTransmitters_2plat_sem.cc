@@ -108,6 +108,7 @@ int main (int argc, char *argv[])
   cmd.AddValue ("numAntennaElements", "number of antenna elements", numAntennaElements);
   cmd.AddValue ("orthogonalResources", "if true, resouces are orthogonal among the two groups, if false resources are shared", orthogonalResources);
   cmd.AddValue ("inputFolder", "folder for input dataset", traceFolder);
+  cmd.AddValue ("power", "physical layer power", power);
   cmd.Parse (argc, argv);
 
   Config::SetDefault ("ns3::MmWaveSidelinkMac::UseAmc", BooleanValue (false));
