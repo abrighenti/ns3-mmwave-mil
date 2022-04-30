@@ -95,6 +95,7 @@ int main (int argc, char *argv[])
   double intThreshold=0.0;
   std::string traceFolder = "input/"; // example traces can be found here
   uint32_t kittimodel=1450;
+  double power=30.0;
 
   CommandLine cmd;
   cmd.AddValue ("mcs", "modulation and coding scheme", mcs);
@@ -125,6 +126,7 @@ int main (int argc, char *argv[])
   Config::SetDefault ("ns3::MmWaveVehicularAntennaArrayModel::NumSectors", UintegerValue (2));
 
   Config::SetDefault ("ns3::KittiTraceBurstGenerator::Model", UintegerValue(kittimodel));
+  Config::SetDefault ("ns3::MmWaveSidelinkPhy::Power", DoubleValue(power));
 
   // create the nodes
   NodeContainer group1, group2;
