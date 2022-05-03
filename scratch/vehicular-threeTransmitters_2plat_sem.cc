@@ -127,7 +127,7 @@ int main (int argc, char *argv[])
   Config::SetDefault ("ns3::MmWaveVehicularAntennaArrayModel::NumSectors", UintegerValue (2));
 
   Config::SetDefault ("ns3::KittiTraceBurstGenerator::Model", UintegerValue(kittimodel));
-  Config::SetDefault ("ns3::MmWaveSidelinkPhy::Power", DoubleValue(power));
+  Config::SetDefault ("ns3::MmWaveSidelinkPhy::TxPower", DoubleValue(power));
 
   // create the nodes
   NodeContainer group1, group2;
