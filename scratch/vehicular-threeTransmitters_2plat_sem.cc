@@ -87,14 +87,14 @@ int main (int argc, char *argv[])
   bool csma = true;
   bool orthogonalResources = false; // if true, resouces are orthogonal among the two groups, if false resources are shared
 
-  double interGroupDistance = 5.0; // distance between the two groups in meters
+  double interGroupDistance = 10.0; // distance between the two groups in meters
   double intraGroupDistance = 20.0; // distance between cars belonging to the same group in meters
   double speed = 20; // speed m/s
 
-  uint32_t numAntennaElements = 4; // number of antenna elements
-  double intThreshold=0.0;
+  uint32_t numAntennaElements = 1; // number of antenna elements
+  double intThreshold=1e-15;
   std::string traceFolder = "input/"; // example traces can be found here
-  uint32_t kittimodel=1450;
+  uint32_t kittimodel=2;
   double power=30.0;
 
   CommandLine cmd;
@@ -316,8 +316,8 @@ int main (int argc, char *argv[])
   Ptr<UniformRandomVariable> rv = CreateObjectWithAttributes<UniformRandomVariable> (
       "Min", DoubleValue (0), "Max", DoubleValue (1.0));
   clientApps.StartWithJitter (Seconds (0.1), rv);
-  clientApps.Stop (Seconds(10));
-  Simulator::Stop (Seconds(11.5));
+  clientApps.Stop (Seconds(7));
+  Simulator::Stop (Seconds(8));
   Simulator::Run ();
   Simulator::Destroy ();
 
