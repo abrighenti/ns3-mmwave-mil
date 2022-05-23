@@ -19,13 +19,15 @@ Main features:
 
 * Simulation of core network elements (with also the MME as a real node)
 
-## Installation
-This repository contains a complete ns-3 installation with the addition of the mmwave module. 
+* All features of Millicar modules, plus CSMA scheme in limited scenarios
 
-Use these commands to download and build `ns3-mmwave`:
+## Installation
+This repository contains a complete ns-3 installation with the addition of the mmwave and Millicar modules. 
+
+Use these commands to download and build `ns3-mmwave-mil`:
 ```
-git clone https://github.com/nyuwireless-unipd/ns3-mmwave.git
-cd ns3-mmwave
+git clone --recurse-submodules https://github.com/abrighenti/ns3-mmwave-mil.git
+cd ns3-mmwave-mil
 ./waf configure --disable-python --enable-examples && ./waf build
 ```
 
@@ -40,7 +42,6 @@ Other examples are included in `src/mmwave/examples/`
 The documentation of this module is available at [this link](./src/mmwave/doc/mmwave-doc.md).
 
 ## Related modules
-- MilliCar is an ns-3 module for the simulation of mmWave NR V2X networks. Check [this repo](https://github.com/signetlabdei/millicar) for further details.
 - A seperate module is being developed for [mmWave UE Energy Consumption](https://github.com/arghasen10/mmwave-energy "mmwave-energy"). You can use this module for analyzing 
 Energy Consumption behaviour of mmwave UE. Check this repository for further details.
 - `ns3-mmwave-iab` is an extended version of `ns3-mmWave` adding wireless relaying capabilities to an ns-3 NetDevice, and the possibility of simulating in-band relaying at mmWave frequencies. Check [this repo](https://github.com/signetlabdei/ns3-mmwave-iab) for further details.
@@ -90,6 +91,7 @@ The ns-3 mmWave module is the result of the development effort carried out by di
 - Sourjya Dutta, NYU Wireless
 - Russell Ford, NYU Wireless
 - Gabriel Arrobo, Intel
+- Alessandro Brighenti, University of Trento
 
 ## License ##
 
